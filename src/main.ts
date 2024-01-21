@@ -10,41 +10,49 @@ const ctx = canvas.getContext('2d') // реализуем интерфейс р�
 const CANVAS_WIDTH = canvas.width
 const CANVAS_HEIGHT = canvas.height
 
+const shots = 3
+
 let keyPress = false
 let direction = 0
 
 let characterX = 0
 let characterY = 0
 
-if (ctx) {
-  const img = document.createElement('img')
-  img.src = mWalkPath
+let lastTimeUpdate = 0
+let step = 0
 
-  img.onload = () => {
-    let step = 0
+function animate(timestamp: number) {
+  const deltaTime = timestamp - lastTimeUpdate
 
-    setInterval(() => {
+  if (ctx) {
+    const img = document.createElement('img')
+    img.src = mWalkPath
+
+    img.onload = () => {
       if (keyPress) {
-        ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
+        step = (step + 0.01 * deltaTime) % shots
 
         if (direction === 0) {
-          characterY += 10
+          characterY += 0.1 * deltaTime
         } else if (direction === 1) {
-          characterX -= 10
+          characterX -= 0.1 * deltaTime
         } else if (direction === 2) {
-          characterX += 10
+          characterX += 0.1 * deltaTime
         } else if (direction === 3) {
-          characterY -= 10
+          characterY -= 0.1 * deltaTime
         }
-
-        if (step === 2) step = 0
-        else step++
       }
       ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
-      ctx.drawImage(img, 48 * step, 48 * direction, 48, 48, characterX, characterY, 64, 64)
-    }, 120)
+      ctx.drawImage(img, 48 * Math.floor(step), 48 * direction, 48, 48, characterX, characterY, 64, 64)
+    }
   }
+
+  lastTimeUpdate = timestamp
+
+  window.requestAnimationFrame(animate)
 }
+
+window.requestAnimationFrame(animate)
 
 function keyDownHandler(event: KeyboardEvent) {
   if (event.key === 'ArrowDown' || event.key === 'Down') {
